@@ -9,7 +9,6 @@
 import Foundation
 
 protocol CoinManagerDelegate {
-    
     func didUpdateExcange(_ coinManager: CoinManager, coin: CoinModel)
     func didFailWithError(error: Error)
 }

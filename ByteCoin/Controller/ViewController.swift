@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDelegate {
+class ViewController: UIViewController, UIPickerViewDataSource {
     
     @IBOutlet weak var bitcoinLabel: UILabel!
     @IBOutlet weak var currencyLabel: UILabel!
@@ -19,13 +19,23 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         
         currencyPicker.dataSource = self
         currencyPicker.delegate = self
+        
+        coinManager.delegate = self
     }
+    
+    var selectedRow: String = ""
+    var coinManager = CoinManager()
+ 
+}
+
+//MARK: -  UIPickerViewDelegate
+
+
+extension ViewController: UIPickerViewDelegate {
     
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 1
     }
-    
-    let coinManager = CoinManager()
     
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
         return coinManager.currencyArray.count
@@ -36,9 +46,26 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     }
 
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        let selectedRow = coinManager.currencyArray[row]
+        selectedRow = coinManager.currencyArray[row]
         coinManager.getCoinPrice(with: selectedRow)
     }
     
+    
 }
 
+//MARK: -  CoinManagerDelegate
+
+extension ViewController: CoinManagerDelegate {
+    
+    //Permetto all'app di lavorare nel beckground così attraverso il DispatchQueue, al fine di non farla crushare.
+    func didUpdateExcange(_ coinManager: CoinManager, coin: CoinModel) {
+        DispatchQueue.main.async {
+            self.bitcoinLabel.text = coin.excangeString
+            self.currencyLabel.text = self.selectedRow
+        }
+    }
+    
+    func didFailWithError(error: Error) {
+        print(error)
+    }
+}
